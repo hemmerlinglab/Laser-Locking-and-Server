@@ -1,6 +1,9 @@
-# py-ws7 – minimal wavemeter webserver
+# Contents of this Repo
+This repository contains the webserver python file, as well as the other files which depend on this data for laser locking and scanning. The PID file opens a com port which communicates with an arduino connected to the laser controlling the scanning and locking by applying a voltage
 
-This webserver is used to extract frequency data used in laser locking and scanning
+
+
+# py-ws7 – minimal wavemeter webserver
 
 py-ws7 is a very simple python webserver that allows to get the wavelength from the High Finesse Angstrom WS7 wavemeter and send it to any computer or phone in your network. Multichannel switch is also supported.
 
