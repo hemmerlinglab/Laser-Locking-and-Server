@@ -1,5 +1,7 @@
 # py-ws7 – minimal wavemeter webserver
 
+This webserver is used to extract frequency data used in laser locking and scanning
+
 py-ws7 is a very simple python webserver that allows to get the wavelength from the High Finesse Angstrom WS7 wavemeter and send it to any computer or phone in your network. Multichannel switch is also supported.
 
 You can have a look at the interface on a [demo page](https://wavemeter.quantumgear.io/demo/).
