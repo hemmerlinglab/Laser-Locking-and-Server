@@ -1,6 +1,5 @@
 # Contents of this Repo
-
-
+This repository contents all the files used in our preliminary data acquisition system, the files used to create the wavemeter server, the laser locking with PID, laser scanning of the Tisaph, and reading the absorption data from the scope
 
 # py-ws7 – minimal wavemeter webserver
 
