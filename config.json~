@@ -1,0 +1,6 @@
+{
+	"precision": 5,
+	"port": 8000,
+	"channels":[{"i":0,"label":"TiSaph 780"}],
+	"root":"/"
+}
