@@ -1,3 +1,8 @@
+#*************************************************************************************
+# Working Scan Laser File which scans the TiSaph with an Arduino and this controls that
+#*************************************************************************************
+
+
 import numpy as np
 import time
 from wlm import *

@@ -1,3 +1,7 @@
+#*************************************************************************************
+# This file attempts to use serial communication with the Arduino connected to the YAG
+#*************************************************************************************
+
 import serial
 import os
 import datetime
