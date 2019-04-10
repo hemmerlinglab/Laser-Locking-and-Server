@@ -8,28 +8,8 @@ import serial
 
 from trigger_fg import *
 
-serial_port = 'COM9'; # Yag TTL Arduino
-baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
 
-try:
-    ser = serial.Serial(serial_port, baud_rate, 
-                        bytesize=serial.SEVENBITS, 
-                        parity=serial.PARITY_ODD, 
-                        stopbits=serial.STOPBITS_ONE, 
-                        timeout=1)
-except:
-    try:
-        ser.close()
-    except:
-        print ("Serial port already closed" )
-    ser = serial.Serial(serial_port, baud_rate, 
-                        bytesize=serial.SEVENBITS, 
-                        parity=serial.PARITY_ODD, 
-                        stopbits=serial.STOPBITS_ONE, 
-                        timeout=1)
-
-
-fg = BK()
+fg = BK_Function_Generator()
 
 wlm = WavelengthMeter()
 
@@ -39,10 +19,16 @@ scan_array = np.array(range(0,1000,100))*1e6/1e12 + offset
 mainpath = "Y:\\Data\\K_Tests\\"
 
 ahora = datetime.datetime.today().strftime(mainpath+'%Y-%m-%d-%H-%M-%S')
+
+# file for channel 1
 f1 = open(ahora+'_1.csv','w')
 f1write = csv.writer(f1)
+
+# file for channel 2
 f2 = open(ahora+'_2.csv','w')
 f2write = csv.writer(f2)
+
+# file for setpoints
 fs = open(ahora+'_set.csv','w')
 fswrite = csv.writer(fs)
 
