@@ -73,7 +73,10 @@ while True:
 	file = open("setpoint.txt", "r")
 	newset = file.readline().strip()
 	file.close()
-	pid.setpoint = float(newset)
+	try:
+		pid.setpoint = float(newset)
+	except:
+		print(newset)
 	
 	
 	# obtains the actual frequency value 

@@ -8,7 +8,7 @@ class ScopeRead():
 		self.v = visa.ResourceManager()
 		self.a = self.v.list_resources()
 		k=0
-		self.s = self.v.open_resource(self.a[k])
+		self.s = self.v.open_resource('USB0::0x0699::0x03A1::C030685::INSTR')
 		#print(self.s.query('*IDN?'))
 		#print('HORIZ SCALE >> ',end='')
 		#print(self.s.query('HORizontal:SCAle?'))
