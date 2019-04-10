@@ -8,15 +8,36 @@ import serial
 
 from trigger_fg import *
 
+k40_d2_line = 391.01617003
+k40_d1_line = 389.28605876
+
+
+def get_scan_array(offset, my_min, my_max, no_of_steps):
+    # return array with laser frequencies
+    # my_min and my_max in MHz
+    # offset in THz
+
+    step_size = np.abs((my_max-my_min))/np.float(no_of_steps)
+
+    return np.array(range(my_min, my_max, step_size))*1e6/1e12 + offset
+
+# parameters
+mainpath = "Y:\\Data\\K_Tests\\"
+setpoint_filename = 'setpoint.txt'
+
 
 fg = BK_Function_Generator()
 
 wlm = WavelengthMeter()
 
-offset = 391.016000 - 0.5e-3
-scan_array = np.array(range(0,1000,100))*1e6/1e12 + offset
+offset = k40_d2_line
+scan_array = get_scan_array(offset, -100, 100)
 
-mainpath = "Y:\\Data\\K_Tests\\"
+setpoint_file = open(setpoint_filename, "w")
+setpoint_file.write(str(scan_array[0]))
+setpoint_file.close()
+
+
 
 ahora = datetime.datetime.today().strftime(mainpath+'%Y-%m-%d-%H-%M-%S')
 
