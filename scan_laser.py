@@ -31,7 +31,7 @@ fg = BK_Function_Generator()
 wlm = WavelengthMeter()
 
 offset = k40_d2_line
-scan_array = get_scan_array(offset, -700, 600, 20)
+scan_array = get_scan_array(offset, -700, 600, 10)
 
 setpoint_file = open(setpoint_filename, "w")
 setpoint_file.write(str(scan_array[0]))
@@ -62,7 +62,7 @@ for k in range(len(scan_array)):
 	print("Scan: " + ahora)
 
 	new_set = scan_array[k] 
-	print("Set point: " + str(new_set) + " (" + str(k) + "/" + str(len(scan_array)) + ")")
+	print("Set point: " + str(new_set) + " (" + str(k+1) + "/" + str(len(scan_array)) + ")")
 	setpoint_file = open("setpoint.txt", "w")
 	setpoint_file.write(str(new_set))
 	setpoint_file.close()
