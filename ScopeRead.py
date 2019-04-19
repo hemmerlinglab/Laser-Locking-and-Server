@@ -27,7 +27,7 @@ class ScopeRead():
 
 		#print('DATA START >> ',end='')
 		#print(self.s.query("data:start?")) #default is 1
-		self.s.write("data:stop 1495") #sets last data point
+		self.s.write("data:stop 1500") #sets last data point
 		#print('DATA STOP >> ',end='')
 		#print(self.s.query("data:stop?")) #default is 1500?
 		#print('GETTING DATA...')

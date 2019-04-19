@@ -8,8 +8,9 @@ import serial
 
 from trigger_fg import *
 
-k40_d2_line = 391.01600000
-k40_d1_line = 389.28605876
+
+k40_d2_line = 391.01617003
+k40_d1_line = 389.28605716
 
 
 def get_scan_array(offset, my_min, my_max, no_of_steps):
@@ -31,7 +32,7 @@ fg = BK_Function_Generator()
 wlm = WavelengthMeter()
 
 offset = k40_d2_line
-scan_array = get_scan_array(offset, -700, 600, 10)
+scan_array = get_scan_array(offset, -200, 500, 10)
 
 setpoint_file = open(setpoint_filename, "w")
 setpoint_file.write(str(scan_array[0]))
@@ -56,6 +57,7 @@ fswrite = csv.writer(fs)
 no_of_averages = 2.0
 
 test_read = ScopeRead()
+#test_read.close_scope()
 
 for k in range(len(scan_array)):
 
@@ -71,7 +73,8 @@ for k in range(len(scan_array)):
 
 	hlp1 = []
 	hlp2 = []
-	for n in range(int(no_of_averages)):
+	n = 0
+	while n < int(no_of_averages):
 		# soft trigger function generator to fire yag
 		fg.trigger()
 
@@ -83,17 +86,25 @@ for k in range(len(scan_array)):
 		print('... done')
 		
 		if n == 0:
-			hlp1 = np.array(test_read.ch1_data[:-7].split(','), dtype = np.float)
 			try:
-				hlp2 = np.array(test_read.ch2_data[:-7].split(','), dtype = np.float)
+				hlp1 = np.array(test_read.ch1_data[:-7].split(','), dtype = np.float)
+				try:
+					hlp2 = np.array(test_read.ch2_data[:-7].split(','), dtype = np.float)
+				except:
+					print('Ch2 is a failure')
+				n += 1
 			except:
-				hlp2 = np.zeros(len(hlp1))
-		else:				
-			hlp1 = np.add(hlp1, np.array(test_read.ch1_data[:-7].split(','), dtype = np.float))
+				print('Read failed... trying again')
+		else:	
 			try:
-				hlp2 = np.add(hlp2, np.array(test_read.ch2_data[:-7].split(','), dtype = np.float))
+				hlp1 = np.add(hlp1, np.array(test_read.ch1_data[:-7].split(','), dtype = np.float))
+				try:
+					hlp2 = np.add(hlp2, np.array(test_read.ch2_data[:-7].split(','), dtype = np.float))
+				except:
+					print('Ch2 is a failure')
+				n += 1
 			except:
-				hlp2 = np.add(hlp1, np.zeros(len(hlp2)))
+				print('Read failed... trying again')
 	
 		
 			
