@@ -100,13 +100,13 @@ while True:
 
 	#print("asdasd")
 	#print(control)
-	print(ard_value)
+	print('Control:',ard_value,end='   ')
 	#print("{0:2.6f}".format(act_value))
 	#print(control)
 	#print(ard_value)
-	print(pid.setpoint)
-	print(act_value)
-	print()
+	print('Set:',pid.setpoint,end='   ')
+	print('Actual:',act_value,end='\r')
+	#print()
 	time.sleep(0.01)
 	
 
