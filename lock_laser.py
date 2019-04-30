@@ -59,7 +59,7 @@ time.sleep(.1)
 pid = PID(Kp,Ki,0.0,setpoint,sample_time = 0.01, output_limits = [-10, 10])
 time.sleep(.2)
 #pid.proportional_on_measurement = True
-print(setpoint)
+#print(setpoint)
 
 
 
@@ -105,7 +105,7 @@ while True:
 	#print(control)
 	#print(ard_value)
 	print('Set:',pid.setpoint,end='   ')
-	print('Actual:',act_value,end='\r')
+	print('Actual:',str(act_value)[:12],end='     \r')
 	#print()
 	time.sleep(0.01)
 	
