@@ -20,8 +20,9 @@ class BK_Function_Generator():
 if __name__ =='__main__':
 	test_read = BK_Function_Generator()
 	
-	for k in range(10):
-		print(k)
+	#for k in range(10):
+	while True:
+		#print(k)
 		test_read.trigger()
 		time.sleep(1)
 

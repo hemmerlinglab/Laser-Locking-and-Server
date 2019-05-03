@@ -17,7 +17,7 @@ class ScopeRead():
 
 
 	def read_data_1(self):
-		self.ch1_scale = 0.02
+		self.ch1_scale = 0.2
 		self.s.write("ch1:volts {0}".format(self.ch1_scale)) # Set the data source to the channel
 		#print('CH1 STATUS >> ',end='')
 		#print(self.s.query("ch1?")) # Set the data source to the channel
@@ -40,7 +40,7 @@ class ScopeRead():
 
 
 	def read_data_2(self):
-		self.ch2_scale = 2
+		self.ch2_scale = 2.0
 		self.s.write("ch2:volts %i" % self.ch2_scale) # Set the data source to the channel
 		#print('CH2 STATUS >> ',end='')
 		#print(self.s.query("ch2?")) # Set the data source to the channel
@@ -67,9 +67,24 @@ class ScopeRead():
 
 
 if __name__ =='__main__':
-	test_read = ScopeRead()
-	test_read.read_data_1()
-	test_read.read_data_2()
-	print(test_read.ch1_data,test_read.ch1_scale)
-	print(test_read.ch2_data,test_read.ch2_scale)
-	test_read.close_scope()
+	
+	while True:
+		input("Press ENTER to read scope")
+		test_read = ScopeRead()
+		test_read.read_data_1()
+		test_read.read_data_2()
+		#print(test_read.ch1_data,test_read.ch1_scale)
+		#print(test_read.ch2_data,test_read.ch2_scale)
+		f1 = open('ch1.txt','a')
+		f2 = open('ch2.txt','a')
+		fs = open('setpts.txt','a')
+		sp = open('setpoint.txt','r')
+		setpt = sp.readline()
+		f1.write(test_read.ch1_data)
+		f2.write(test_read.ch2_data)
+		fs.write(setpt+'\n')
+		f1.close()
+		f2.close()
+		fs.close()
+		test_read.close_scope()
+		
