@@ -21,8 +21,9 @@ if __name__ =='__main__':
 	test_read = BK_Function_Generator()
 	
 	#for k in range(10):
+	print('Running ...')
 	while True:
-		#print(k)
+		print('Trigger ...')
 		test_read.trigger()
 		time.sleep(1)
 
