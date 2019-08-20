@@ -1,6 +1,7 @@
 {
 	"precision": 5,
 	"port": 8000,
-	"channels":[{"i":0,"label":"TiSaph 780","background":"#300"}],
+	"channels":[{"i":0,"label":"Natasha","background":"#300"},
+				{"i":1,"label":"Wanda","background":"#300"}],
 	"root":"/wavemeter/"
 }
