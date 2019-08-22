@@ -6,7 +6,7 @@ from simple_pid import PID
 from wlm import *
 from Fiber import *
 #import numpy
-
+n = 100
 serial_port  = 'COM8'; #pid lock arduino port
 
 baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
@@ -42,15 +42,17 @@ wlm = WavelengthMeter()
 
 #initialize the fiber switcher
 fib1 = Fiber('COM1')
-chans = [2]
-setpoint_files = ['setpoint2.txt','setpoint.txt']
+chans = [1,2]
+setpoint_files = ['setpoint.txt','setpoint2.txt']
 setpoints = [0,0]
 act_values = [0,0]
 ard_values = [0,0]
-
+ard_mess = [20482,20481]
+print('-'*n)
+print('-'*n)
+print('        DUAL LASER LOCK')
+print('-'*n)
 print('Setpoint files in Z:\\')
-for i in range(len(chans)):
-    print('Channel {} is being set off file {}'.format(chans[i],setpoint_files[i]))
 
 
 #obtaining the setpoints
@@ -67,14 +69,19 @@ for i in range(len(chans)):
 
 #diff = abs(pid.setpoint - wlm.frequency)
 pids = ['','']
-Kps = [-1000,-1000]
-Kis = [-20000,-20000]
-time.sleep(.1)
+Kps = [1000,-1000]
+Kis = [200000,-20000]
+Kds = [0,0]
+#time.sleep(.1)
+for i in range(len(chans)):
+    print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
+print('-'*n)
+
 
 for i in range(len(chans)):
-    pid = PID(Kps[i],Kis[i],0.0,setpoints[i],sample_time = 0.01, output_limits = [-10, 10])
+    pid = PID(Kps[i],Kis[i],Kds[i],setpoints[i],sample_time = 0.01, output_limits = [-10, 10])
     pids[i] = pid
-    time.sleep(.2)
+    #time.sleep(.2)
 #pid.proportional_on_measurement = True
 #print(setpoint)
 
@@ -83,6 +90,7 @@ for i in range(len(chans)):
 while True:
         for i in range(len(chans)):
             fib1.setchan(chans[i])
+            time.sleep(.06)
             # Kp and Ki need to be updated live as to ensure the PID does not run out of range
 
 
@@ -98,29 +106,37 @@ while True:
             
             
             # obtains the actual frequency value 
-            act_values[i] = wlm.frequency
-            control = pids[i](act_values[i])
-            #if abs(control) >= 9.9:
-            #       pid.Kp = pid.Kp/2
-            #       pid.Ki = pid.Ki/2
-            
-            # converts into a value that the ardunio can actually read (reads in int bits in a range of 0 to 4095)
-            ##ard_values[i] = int(4095.0/20 * control + 4095.0/2.0)
-            ard_mess =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[i]
-            ##for j in range(len(chans)):
-            ##    ard_mess = ard_mess + ' ' + str(ard_values[j])
-            # ard_value is between 0 and 4095
-            #ard_value = 0
-            #ard_value = k
-            # feeds converted arduino file to the port
-            mystr = '{:05d}'.format(ard_mess).encode('utf-8')
-            ser.write(mystr) # converts from unicode to bytes
+            new_freq = wlm.frequency
+            if new_freq >= 0:
+                act_values[i] = new_freq
+                control = pids[i](act_values[i])
+                #if abs(control) >= 9.9:
+                #       pid.Kp = pid.Kp/2
+                #       pid.Ki = pid.Ki/2
+                
+                # converts into a value that the ardunio can actually read (reads in int bits in a range of 0 to 4095)
+                ##ard_values[i] = int(4095.0/20 * control + 4095.0/2.0)
+                ard_mess[i] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[i]
+                ##for j in range(len(chans)):
+                ##    ard_mess = ard_mess + ' ' + str(ard_values[j])
+                # ard_value is between 0 and 4095
+                #ard_value = 0
+                #ard_value = k
+                # feeds converted arduino file to the port
+                mystr = '{:05d}'.format(ard_mess[i]).encode('utf-8')
+                ser.write(mystr) # converts from unicode to bytes
+            elif new_freq == -3.0:
+                act_values[i] = 'UNDER'
+            elif new_freq == -4.0:
+                act_values[i] = 'OVER'
+            else:
+                act_values[i] = 'ERROR'
 
         #print("asdasd")
         #print(control)
             for k in range(len(chans)):
                 #print('CNTL {}:'.format(chans[k]),ard_values[k],end='  ')
-                print('CNTL {}:'.format(chans[k]),int((ard_mess-chans[k])/10),end='  ')
+                print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
         #print("{0:2.6f}".format(act_value))
         #print(control)
         #print(ard_value)
@@ -128,8 +144,8 @@ while True:
                 print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
         #print()
             print('            \r',end='')
-            time.sleep(0.01)
-        time.sleep(0.01)
+            #time.sleep(0.02)
+        #time.sleep(0.01)
         
 
 

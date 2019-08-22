@@ -35,7 +35,7 @@ void loop()
 {
   //val = analogRead(analogPin);   // read the input pin
   
-  if (Serial.available() > 0) {
+  if (Serial.available() > 12) {
                 // read the incoming byte:
                 //incomingByte = Serial.read();
 
@@ -54,7 +54,7 @@ void loop()
                 if(chan==1){
                   analogWrite(DAC0,val);
                 }
-                else{
+                if(chan==2){
                   analogWrite(DAC1,val);
                 }
                   // analogRead values go from 0 to 1023, analogWrite values from 0 to 255
