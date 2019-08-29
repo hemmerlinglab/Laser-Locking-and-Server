@@ -13,6 +13,8 @@ void setup()
   //pinMode(analogPin, OUTPUT);   // sets the pin as output
    analogWriteResolution(12);
    Serial.begin(9600);
+   analogWrite(DAC0,2048);
+   analogWrite(DAC1,2048);
 }
 
 int conv(char ch)
@@ -35,7 +37,7 @@ void loop()
 {
   //val = analogRead(analogPin);   // read the input pin
   
-  if (Serial.available() > 12) {
+  if (Serial.available() > 0) {
                 // read the incoming byte:
                 //incomingByte = Serial.read();
 
@@ -77,10 +79,11 @@ void loop()
                 //Serial.println(val);
                 //Serial.println(1234346);
                 //Serial.println("end");
+                //delay(1);
                 
         }
         
   
-  //delay(2);
+  delay(2);
   
 }

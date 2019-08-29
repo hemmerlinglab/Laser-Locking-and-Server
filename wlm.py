@@ -58,6 +58,17 @@ class WavelengthMeter:
             "exposureMode": self.GetExposureMode()
         }
 
+    def Trigger(self,opt=3):
+        # opt values:
+        # 0: cCtrlMeasurementContinue
+        # 1: cCtrlMeasurementInterrupt
+        # 2: cCtrlMeasurementTriggerPoll
+        # 3: cCtrelMeasurementTriggerSuccess
+        if not self.debug:
+            return self.dll.TriggerMeasurement(ctypes.c_long(opt))
+        else:
+            return 0
+
     @property
     def frequencies(self):
 	    return [self.GetFrequency(i+1) for i in range(8)]
