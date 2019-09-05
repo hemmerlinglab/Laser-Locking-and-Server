@@ -7,146 +7,230 @@ from wlm import *
 from Fiber import *
 import curses
 
-n = 100
-serial_port  = 'COM8'; #pid lock arduino port
+def main(stdscr):
+    ###
+    stdscr.nodelay(True)
+    curses.noecho()
+    stdscr.keypad(True)
+    curses.curs_set(0)
+    scrx = [5,55]
+    scry = 15
+    if curses.has_colors:
+        curses.start_color()
+        curses.init_pair(1,curses.COLOR_RED,curses.COLOR_BLUE)
+    stdscr.addstr(0,0,'Starting...',curses.color_pair(1))
+    stdscr.refresh()
+   # time.sleep(2)
+    ###
 
-baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
+    n = 100
+    serial_port  = 'COM8'; #pid lock arduino port
 
-try:
-    ser = serial.Serial(serial_port, baud_rate, 
-                        bytesize=serial.SEVENBITS, 
-                        parity=serial.PARITY_ODD, 
-                        stopbits=serial.STOPBITS_ONE, 
-                        timeout=1)
-except:
+    baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
+
     try:
-        ser.close()
+        ser = serial.Serial(serial_port, baud_rate, 
+                            bytesize=serial.SEVENBITS, 
+                            parity=serial.PARITY_ODD, 
+                            stopbits=serial.STOPBITS_ONE, 
+                            timeout=1)
     except:
-        print ("Serial port already closed" )
-    ser = serial.Serial(serial_port, baud_rate, 
-                        bytesize=serial.SEVENBITS, 
-                        parity=serial.PARITY_ODD, 
-                        stopbits=serial.STOPBITS_ONE, 
-                        timeout=1)
-
-wlm = WavelengthMeter()
-
-fib1 = Fiber('COM1')
-chans = [1,2]
-setpoint_files = ['setpoint.txt','setpoint2.txt']
-setpoints = [0,0]
-act_values = [0,0]
-ard_values = [0,0]
-ard_mess = [20482,20481]
-
-###
-stdscr = curses.initscr()
-curses.nodelay(True)
-curses.noecho()
-curses.cbreak()
-stdscr.keypad(True)
-curses.curs_set(0)
-
-scrx = [5,105]
-scry = 50
-###
-
-# print('-'*n)
-# print('-'*n)
-# print('        DUAL LASER LOCK')
-# print('-'*n)
-# print('        Setpoint files in Z:\\')
-
-###
-stdscr.addstr(0,0,'-'*n)
-stdscr.addstr(1,10,'DUAL LASER LOCK')
-stdscr.addstr(2,0,'-'*n)
-stdscr.addstr(3,10,'Setpoint files in Z:\\')
-###
-
-for i in range(len(chans)):
-    file = open("z:\\"+setpoint_files[i], "r")
-    setpoints[i] = file.readline().strip()
-    file.close()
-
-pids = ['','']
-Kps = [-1000,500]
-Kis = [-20000,10000]
-Kds = [0,0]
-
-for i in range(len(chans)):
-    #print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
-    ###
-    stdscr.addstr(i+5,10,'Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
-    ###
-    pid = PID(Kps[i],Kis[i],Kds[i],setpoints[i],sample_time = 0.01, output_limits = [-10, 10])
-    pids[i] = pid
-    fib1.setchan(chans[i])
-#print('-'*n)
-###
-stdscr.addstr(10,0,'-'*n)
-stdscr.refresh()
-NO_KEY_PRESSED = -1
-key_pressed = NO_KEY_PRESSED
-###
-
-while key_pressed != ord('q'):
-    key_pressed = stdscr.getch()
-    for l in range(len(chans)):
-        
-        newset = ''
-        
-        file = open("z:\\"+setpoint_files[l], "r")
-        newset = file.readline().strip()
-        file.close()
         try:
-                pids[l].setpoint = float(newset)
+            ser.close()
         except:
-                pass
+            print ("Serial port already closed" )
+        ser = serial.Serial(serial_port, baud_rate, 
+                            bytesize=serial.SEVENBITS, 
+                            parity=serial.PARITY_ODD, 
+                            stopbits=serial.STOPBITS_ONE, 
+                            timeout=1)
 
-        # obtains the actual frequency value
-        fib1.setchan(chans[l-1])
-        time.sleep(.03)
-        try_trig = wlm.Trigger(3)
-        time.sleep(.02) 
-        new_freq = wlm.frequency
-        time.sleep(.02)
-        wlm.Trigger(1)
+    wlm = WavelengthMeter()
 
-        if new_freq >= 0:
-            act_values[l] = new_freq
-            control = pids[l](act_values[l])
-            ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
-            mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
-            ser.write(mystr) # converts from unicode to bytes
-            
+    fib1 = Fiber('COM1')
+    chans = [1,2]
+    setpoint_files = ['setpoint.txt','setpoint2.txt']
+    setpoints = [0,0]
+    act_values = [0,0]
+    ard_values = [0,0]
+    ard_mess = [20482,20481]
 
-        elif new_freq == -3.0:
-            act_values[l] = 'UNDER     '
-        elif new_freq == -4.0:
-            act_values[l] = 'OVER      '
-        else:
-            act_values[l] = 'ERROR     '
 
-    
-        # for k in range(len(chans)):
-        #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
-        #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
-        #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
+
+    # print('-'*n)
+    # print('-'*n)
+    # print('        DUAL LASER LOCK')
+    # print('-'*n)
+    # print('        Setpoint files in Z:\\')
+
+    ###
+    stdscr.addstr(0,0,'-'*n)
+    stdscr.addstr(1,10,'DUAL LASER LOCK')
+    stdscr.addstr(2,0,'-'*n)
+    stdscr.addstr(3,10,'Setpoint files in Z:\\')
+    stdscr.refresh()
+    ###
+
+    for i in range(len(chans)):
+        file = open("z:\\"+setpoint_files[i], "r")
+        setpoints[i] = file.readline().strip()
+        file.close()
+
+    pids = ['','']
+    Kps = [-1000,500]
+    Kis = [-20000,10000]
+    Kds = [0,0]
+
+    for i in range(len(chans)):
+        #print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
         ###
-        stdscr.addstr(scry,scrx[l],'CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'))
-        stdscr.addstr(scry+1,scrx[l],'SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10])
-        stdscr.addstr(scry+2,scrx[l],'ACT {}:'.format(chans[k]),str(act_values[k])[:10])
+        stdscr.addstr(i+5,10,'Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
+        ###
+        pid = PID(Kps[i],Kis[i],Kds[i],setpoints[i],sample_time = 0.01, output_limits = [-10, 10])
+        pids[i] = pid
+        fib1.setchan(chans[i])
+    #print('-'*n)
+    ###
+    stdscr.addstr(10,0,'-'*n)
+    stdscr.addstr(scry+10,0,"Press q to quit")
+    stdscr.addstr(scry+11,0,"Press 1 for Ch 1")
+    stdscr.addstr(scry+12,0,"Press 2 for Ch 2")
+    stdscr.addstr(scry+13,0,"Press a for All Chs")
+    stdscr.refresh()
+    NO_KEY_PRESSED = -1
+    key_pressed = NO_KEY_PRESSED
+    chan_mode = 0
+    stdscr.addstr(scry+5,scrx[1],'ENABLED ')
+    stdscr.addstr(scry+5,scrx[0],'ENABLED ')
+    ###
+
+    while key_pressed != ord('q'):
         stdscr.refresh()
-        ###
+        key_pressed = stdscr.getch()
+        if key_pressed == ord('1'):
+            fib1.setchan(1)
+            time.sleep(.1)
+            wlm.Trigger(0)
+            chan_mode = 1
+            stdscr.addstr(scry+5,scrx[0],'ENABLED ')
+            stdscr.addstr(scry+5,scrx[1],'DISABLED')
 
-       #print('            \r',end='')
-    time.sleep(0.01)
-    
-ser.close()
-###
-curses.nocbreak()
-stdscr.keypad(False)
-curses.echo()
-curses.endwin()
-###
+        elif key_pressed == ord('2'):
+            fib1.setchan(2)
+            time.sleep(.1)
+            wlm.Trigger(0)
+            chan_mode = 2
+            stdscr.addstr(scry+5,scrx[1],'ENABLED ')
+            stdscr.addstr(scry+5,scrx[0],'DISABLED')
+
+        elif key_pressed == ord('a'):
+            chan_mode = 0
+            stdscr.addstr(scry+5,scrx[1],'ENABLED ')
+            stdscr.addstr(scry+5,scrx[0],'ENABLED ')
+        else:
+            pass
+
+        if chan_mode == 0:
+            for l in range(len(chans)):
+                
+                newset = ''
+                
+                file = open("z:\\"+setpoint_files[l], "r")
+                newset = file.readline().strip()
+                file.close()
+                try:
+                        pids[l].setpoint = float(newset)
+                except:
+                        pass
+
+                # obtains the actual frequency value
+                fib1.setchan(chans[l-1])
+                time.sleep(.03)
+                try_trig = wlm.Trigger(3)
+                time.sleep(.02) 
+                new_freq = wlm.frequency
+                time.sleep(.02)
+                wlm.Trigger(1)
+
+                if new_freq >= 0:
+                    act_values[l] = new_freq
+                    control = pids[l](act_values[l])
+                    ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
+                    mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
+                    ser.write(mystr) # converts from unicode to bytes
+                    
+
+                elif new_freq == -3.0:
+                    act_values[l] = 'UNDER     '
+                elif new_freq == -4.0:
+                    act_values[l] = 'OVER      '
+                else:
+                    act_values[l] = 'ERROR     '
+
+            
+                # for k in range(len(chans)):
+                #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
+                #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
+                #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
+                ###
+                stdscr.addstr(scry-1,scrx[l],'CH: '+str(chans[l]),curses.color_pair(1))
+                stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
+                stdscr.addstr(scry+1,scrx[l],'SET: '+str(pids[l].setpoint)[:10])
+                stdscr.addstr(scry+2,scrx[l],'ACT: '+str(act_values[l])[:10])
+                stdscr.refresh()
+                ###
+        else:
+            newset = ''
+            l = chan_mode-1
+            file = open("z:\\"+setpoint_files[l], "r")
+            newset = file.readline().strip()
+            file.close()
+            try:
+                    pids[l].setpoint = float(newset)
+            except:
+                    pass
+
+            # obtains the actual frequency value
+            fib1.setchan(chans[l-1])
+            time.sleep(.03)
+            try_trig = wlm.Trigger(3)
+            time.sleep(.02) 
+            new_freq = wlm.frequency
+            time.sleep(.02)
+            wlm.Trigger(1)
+
+            if new_freq >= 0:
+                act_values[l] = new_freq
+                control = pids[l](act_values[l])
+                ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
+                mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
+                ser.write(mystr) # converts from unicode to bytes
+                
+
+            elif new_freq == -3.0:
+                act_values[l] = 'UNDER     '
+            elif new_freq == -4.0:
+                act_values[l] = 'OVER      '
+            else:
+                act_values[l] = 'ERROR     '
+
+        
+            # for k in range(len(chans)):
+            #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
+            #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
+            #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
+            ###
+            stdscr.addstr(scry-1,scrx[l],'CH: '+str(chans[l]),curses.color_pair(1))
+            stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
+            stdscr.addstr(scry+1,scrx[l],'SET: '+str(pids[l].setpoint)[:10])
+            stdscr.addstr(scry+2,scrx[l],'ACT: '+str(act_values[l])[:10])
+            stdscr.refresh()
+
+               #print('            \r',end='')
+        time.sleep(0.01)
+        
+    wlm.Trigger(0)
+    ser.close()
+
+
+curses.wrapper(main)

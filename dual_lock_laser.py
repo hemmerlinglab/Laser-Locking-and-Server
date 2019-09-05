@@ -73,8 +73,8 @@ for i in range(len(chans)):
 
 #diff = abs(pid.setpoint - wlm.frequency)
 pids = ['','']
-Kps = [-1000,500]
-Kis = [-20000,10000]
+Kps = [-1000,1000]
+Kis = [-20000,20000]
 Kds = [0,0]
 #time.sleep(.1)
 for i in range(len(chans)):
