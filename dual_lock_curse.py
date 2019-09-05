@@ -92,56 +92,56 @@ key_pressed = NO_KEY_PRESSED
 
 while key_pressed != ord('q'):
     key_pressed = stdscr.getch()
-        for l in range(len(chans)):
-            
-            newset = ''
-            
-            file = open("z:\\"+setpoint_files[l], "r")
-            newset = file.readline().strip()
-            file.close()
-            try:
-                    pids[l].setpoint = float(newset)
-            except:
-                    pass
-
-            # obtains the actual frequency value
-            fib1.setchan(chans[l-1])
-            time.sleep(.03)
-            try_trig = wlm.Trigger(3)
-            time.sleep(.02) 
-            new_freq = wlm.frequency
-            time.sleep(.02)
-            wlm.Trigger(1)
-
-            if new_freq >= 0:
-                act_values[l] = new_freq
-                control = pids[l](act_values[l])
-                ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
-                mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
-                ser.write(mystr) # converts from unicode to bytes
-                
-
-            elif new_freq == -3.0:
-                act_values[l] = 'UNDER     '
-            elif new_freq == -4.0:
-                act_values[l] = 'OVER      '
-            else:
-                act_values[l] = 'ERROR     '
-
+    for l in range(len(chans)):
         
-            # for k in range(len(chans)):
-            #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
-            #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
-            #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
-            ###
-            stdscr.addstr(scry,scrx[l],'CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'))
-            stdscr.addstr(scry+1,scrx[l],'SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10])
-            stdscr.addstr(scry+2,scrx[l],'ACT {}:'.format(chans[k]),str(act_values[k])[:10])
-            stdscr.refresh()
-            ###
+        newset = ''
+        
+        file = open("z:\\"+setpoint_files[l], "r")
+        newset = file.readline().strip()
+        file.close()
+        try:
+                pids[l].setpoint = float(newset)
+        except:
+                pass
 
-           #print('            \r',end='')
-        time.sleep(0.01)
+        # obtains the actual frequency value
+        fib1.setchan(chans[l-1])
+        time.sleep(.03)
+        try_trig = wlm.Trigger(3)
+        time.sleep(.02) 
+        new_freq = wlm.frequency
+        time.sleep(.02)
+        wlm.Trigger(1)
+
+        if new_freq >= 0:
+            act_values[l] = new_freq
+            control = pids[l](act_values[l])
+            ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
+            mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
+            ser.write(mystr) # converts from unicode to bytes
+            
+
+        elif new_freq == -3.0:
+            act_values[l] = 'UNDER     '
+        elif new_freq == -4.0:
+            act_values[l] = 'OVER      '
+        else:
+            act_values[l] = 'ERROR     '
+
+    
+        # for k in range(len(chans)):
+        #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
+        #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
+        #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
+        ###
+        stdscr.addstr(scry,scrx[l],'CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'))
+        stdscr.addstr(scry+1,scrx[l],'SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10])
+        stdscr.addstr(scry+2,scrx[l],'ACT {}:'.format(chans[k]),str(act_values[k])[:10])
+        stdscr.refresh()
+        ###
+
+       #print('            \r',end='')
+    time.sleep(0.01)
     
 ser.close()
 ###
