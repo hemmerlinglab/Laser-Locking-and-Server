@@ -17,7 +17,9 @@ def main(stdscr):
     scry = 15
     if curses.has_colors:
         curses.start_color()
-        curses.init_pair(1,curses.COLOR_RED,curses.COLOR_BLUE)
+        curses.init_pair(1,curses.COLOR_WHITE,curses.COLOR_BLUE)
+        curses.init_pair(2,curses.COLOR_WHITE,curses.COLOR_RED)
+        curses.init_pair(3,curses.COLOR_BLACK,curses.COLOR_GREEN)
     stdscr.addstr(0,0,'Starting...',curses.color_pair(1))
     stdscr.refresh()
    # time.sleep(2)
@@ -100,8 +102,8 @@ def main(stdscr):
     NO_KEY_PRESSED = -1
     key_pressed = NO_KEY_PRESSED
     chan_mode = 0
-    stdscr.addstr(scry+5,scrx[1],'ENABLED ')
-    stdscr.addstr(scry+5,scrx[0],'ENABLED ')
+    stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
+    stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
     ###
 
     while key_pressed != ord('q'):
@@ -112,21 +114,21 @@ def main(stdscr):
             time.sleep(.1)
             wlm.Trigger(0)
             chan_mode = 1
-            stdscr.addstr(scry+5,scrx[0],'ENABLED ')
-            stdscr.addstr(scry+5,scrx[1],'DISABLED')
+            stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[1],'DISABLED',curses.color_pair(2))
 
         elif key_pressed == ord('2'):
             fib1.setchan(2)
             time.sleep(.1)
             wlm.Trigger(0)
             chan_mode = 2
-            stdscr.addstr(scry+5,scrx[1],'ENABLED ')
-            stdscr.addstr(scry+5,scrx[0],'DISABLED')
+            stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))
 
         elif key_pressed == ord('a'):
             chan_mode = 0
-            stdscr.addstr(scry+5,scrx[1],'ENABLED ')
-            stdscr.addstr(scry+5,scrx[0],'ENABLED ')
+            stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
         else:
             pass
 
