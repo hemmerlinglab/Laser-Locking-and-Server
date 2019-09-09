@@ -13,7 +13,7 @@ def main(stdscr):
     curses.noecho()
     stdscr.keypad(True)
     curses.curs_set(0)
-    scrx = [5,55]
+    scrx = [5,35,55]
     scry = 15
     if curses.has_colors:
         curses.start_color()
@@ -25,7 +25,7 @@ def main(stdscr):
    # time.sleep(2)
     ###
 
-    n = 100
+    n = 80
     serial_port  = 'COM8'; #pid lock arduino port
 
     baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
@@ -48,16 +48,19 @@ def main(stdscr):
                             timeout=1)
 
     wlm = WavelengthMeter()
-
+    time.sleep(2)
     fib1 = Fiber('COM1')
     fib1.setchan(1)
-    chans = [1,2]
-    setpoint_files = ['setpoint.txt','setpoint2.txt']
-    setpoints = [0,0]
-    act_values = [0,0]
-    ard_values = [0,0]
-    ard_mess = [20481,20482]
-    names = ['DAVOS','ARYA']
+    time.sleep(0.005)
+    #chan_chk = fib1.getchan()
+    #stdscr.addstr(scry+4,(scrx[1]+scrx[0])//2,chan_chk)
+    chans = [1,2,3]
+    setpoint_files = ['setpoint.txt','setpoint2.txt','setpoint3.txt']
+    setpoints = [0,0,0]
+    act_values = [0,0,0]
+    ard_values = [0,0,0]
+    ard_mess = [20481,20482,20483]
+    names = ['DAVOS','ARYA','A LASER']
 
 
 
@@ -79,10 +82,10 @@ def main(stdscr):
         file = open("z:\\"+setpoint_files[i], "r")
         setpoints[i] = file.readline().strip()
         file.close()
-    pids = ['','']
-    Kps = [-1000,100]
-    Kis = [-10000,1000]
-    Kds = [0,0]
+    pids = ['','','']
+    Kps = [100,100,100]
+    Kis = [1000,1000,1000]
+    Kds = [0,0,0]
 
     for i in range(len(chans)):
         #print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
@@ -105,7 +108,13 @@ def main(stdscr):
     chan_mode = 0
     stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
     stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
+    stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(3))
+
     ###
+
+    try_trig = wlm.Trigger(3)
+    #time.sleep(.01)
+    new_freq = wlm.frequency
 
     while key_pressed != ord('q'):
         stdscr.refresh()
@@ -117,6 +126,7 @@ def main(stdscr):
             chan_mode = 1
             stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
             stdscr.addstr(scry+5,scrx[1],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(2))
 
         elif key_pressed == ord('2'):
             fib1.setchan(2)
@@ -124,12 +134,24 @@ def main(stdscr):
             wlm.Trigger(0)
             chan_mode = 2
             stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))            
+            stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(2))
+
+        elif key_pressed == ord('3'):
+            fib1.setchan(3)
+            time.sleep(.1)
+            wlm.Trigger(0)
+            chan_mode = 3
+            stdscr.addstr(scry+5,scrx[1],'DISABLED',curses.color_pair(2))
             stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[2],'ENABLED ',curses.color_pair(3))
+
 
         elif key_pressed == ord('a'):
             chan_mode = 0
             stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
             stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[2],'ENABLED ',curses.color_pair(3))
         else:
             pass
 
@@ -163,7 +185,7 @@ def main(stdscr):
                 time.sleep(.03)
                 try_trig = wlm.Trigger(3)
                 #time.sleep(.01)
-                new_freq = wlm.frequency                
+                new_freq = wlm.frequency               
                 #time.sleep(.01)
                 #wlm.Trigger(1)
                 #stdscr.addstr(scry+5,(scrx[1]+scrx[0])//2,'Last Delay: '+str(d)+'   ')
