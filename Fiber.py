@@ -59,7 +59,7 @@ class Fiber():
 		if type(command) != 'str':
 			command = str(command)
 
-		self.ser.write(command.encode()+self.term)
+		self.ser.write(command.encode('ascii')+self.term)
 
 		if '?' in command:
 			res = self.listen()
@@ -67,16 +67,18 @@ class Fiber():
 
 	def listen(self):
 		try:
-			ret = self.ser.readline().decode()
+			ret = self.ser.read().decode()
 			#print(ret)
 			listening = True
+			#time.sleep(0.005)
 			while listening:
+				#print(ret.encode())
 				if '\r\n>' in ret:
 					listening = False
 					#print(type(ret))
 					return ret.split('\r\n>')[0][-1]
 				else:
-					newret = self.ser.readline().decode()
+					newret = self.ser.read().decode()
 					#print(newret)
 					ret = ret + newret
 		except:
@@ -88,7 +90,7 @@ class Fiber():
 	def getchan(self):
 		res = self.query('I1?')
 		#print(res.encode())
-		return int(res)
+		return res
 
 	def cycle(self,channels):
 		self.cycling = True
@@ -139,8 +141,12 @@ if __name__ == '__main__':
 	fib1 = Fiber('COM1')
 	#fib1.switch_test(range(17))
 	#fib1.cycle((1,2))
-	new_chan = 1
-	while new_chan != 0:
-		new_chan = int(input('Set Channel >>> '))
-		fib1.setchan(new_chan)
-		print('Current Channel: {}'.format(new_chan))
+	while True:
+		for i in (1,2):
+			#print('-'*10)
+			print(fib1.getchan(),end='   ')
+			fib1.setchan(i)
+			time.sleep(.05)
+			print(fib1.getchan(),end='   ')
+			#time.sleep(.5)
+			print(fib1.getchan(),end='\r')

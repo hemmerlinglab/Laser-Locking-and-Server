@@ -50,12 +50,14 @@ def main(stdscr):
     wlm = WavelengthMeter()
 
     fib1 = Fiber('COM1')
+    fib1.setchan(1)
     chans = [1,2]
     setpoint_files = ['setpoint.txt','setpoint2.txt']
     setpoints = [0,0]
     act_values = [0,0]
     ard_values = [0,0]
-    ard_mess = [20482,20481]
+    ard_mess = [20481,20482]
+    names = ['DAVOS','ARYA']
 
 
 
@@ -77,10 +79,9 @@ def main(stdscr):
         file = open("z:\\"+setpoint_files[i], "r")
         setpoints[i] = file.readline().strip()
         file.close()
-
     pids = ['','']
-    Kps = [-1000,500]
-    Kis = [-20000,10000]
+    Kps = [-1000,100]
+    Kis = [-10000,1000]
     Kds = [0,0]
 
     for i in range(len(chans)):
@@ -146,13 +147,27 @@ def main(stdscr):
                         pass
 
                 # obtains the actual frequency value
-                fib1.setchan(chans[l-1])
+                fib1.setchan(chans[l])
+                d = 0
+                time.sleep(0.005)
+                rawch = fib1.getchan()
+                while int(rawch) != chans[l]:
+                    #stdscr.addstr(scry+4,(scrx[1]+scrx[0])//2,'Raw: '+str(rawch)+' ')
+                    #stdscr.refresh()
+                    if d == 1000:
+                        break
+                    time.sleep(0.001)
+                    d += 1
+                    rawch = fib1.getchan()
+
                 time.sleep(.03)
                 try_trig = wlm.Trigger(3)
-                time.sleep(.02) 
-                new_freq = wlm.frequency
-                time.sleep(.02)
-                wlm.Trigger(1)
+                #time.sleep(.01)
+                new_freq = wlm.frequency                
+                #time.sleep(.01)
+                #wlm.Trigger(1)
+                #stdscr.addstr(scry+5,(scrx[1]+scrx[0])//2,'Last Delay: '+str(d)+'   ')
+                time.sleep(1)
 
                 if new_freq >= 0:
                     act_values[l] = new_freq
@@ -175,7 +190,7 @@ def main(stdscr):
                 #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
                 #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
                 ###
-                stdscr.addstr(scry-1,scrx[l],'CH: '+str(chans[l]),curses.color_pair(1))
+                stdscr.addstr(scry-1,scrx[l],names[l],curses.color_pair(1))
                 stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
                 stdscr.addstr(scry+1,scrx[l],'SET: '+str(pids[l].setpoint)[:10])
                 stdscr.addstr(scry+2,scrx[l],'ACT: '+str(act_values[l])[:10])
@@ -193,13 +208,13 @@ def main(stdscr):
                     pass
 
             # obtains the actual frequency value
-            fib1.setchan(chans[l-1])
-            time.sleep(.03)
-            try_trig = wlm.Trigger(3)
-            time.sleep(.02) 
+            #fib1.setchan(chans[l-1])
+            #time.sleep(.01)
+            #try_trig = wlm.Trigger(3)
+            #time.sleep(.01) 
             new_freq = wlm.frequency
-            time.sleep(.02)
-            wlm.Trigger(1)
+            #time.sleep(.01)
+            #wlm.Trigger(1)
 
             if new_freq >= 0:
                 act_values[l] = new_freq
@@ -222,14 +237,14 @@ def main(stdscr):
             #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
             #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
             ###
-            stdscr.addstr(scry-1,scrx[l],'CH: '+str(chans[l]),curses.color_pair(1))
+            stdscr.addstr(scry-1,scrx[l],names[l],curses.color_pair(1))
             stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
             stdscr.addstr(scry+1,scrx[l],'SET: '+str(pids[l].setpoint)[:10])
             stdscr.addstr(scry+2,scrx[l],'ACT: '+str(act_values[l])[:10])
             stdscr.refresh()
 
                #print('            \r',end='')
-        time.sleep(0.01)
+        time.sleep(0.001)
         
     wlm.Trigger(0)
     ser.close()
