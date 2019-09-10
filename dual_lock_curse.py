@@ -309,7 +309,10 @@ def main(stdscr):
                 stdscr.addstr(scry-1,scrx[l],names[l],curses.color_pair(1))
                 stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
                 stdscr.addstr(scry+1,scrx[l],'SET: '+"{0:.6f}".format(pids[l].setpoint))
-                stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
+                try:
+                    stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
+                except:
+                    stdscr.addstr(scry+2,scrx[l],'ACT: '+act_values[l]+'       ')
                 stdscr.refresh()
                 #logfile.write('l: {}  CTL: {}  SET: {}  ACT: {}\n'.format(l,format(int((ard_mess[l]-chans[l])/10),'04d'),pids[l].setpoint,act_values[l]))
                 ###
@@ -357,7 +360,10 @@ def main(stdscr):
             stdscr.addstr(scry-1,scrx[l],names[l],curses.color_pair(1))
             stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
             stdscr.addstr(scry+1,scrx[l],'SET: '+"{0:.6f}".format(pids[l].setpoint))
-            stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
+            try:
+                stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
+            except:
+                stdscr.addstr(scry+2,scrx[l],'ACT: '+act_values[l]+'       ')
             stdscr.refresh()
 
                #print('            \r',end='')
