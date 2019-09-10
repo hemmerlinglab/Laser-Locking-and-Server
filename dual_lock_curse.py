@@ -8,23 +8,27 @@ from Fiber import *
 import curses
 
 def main(stdscr):
+    #logfile = open('logfile.txt','w')
+    #logfile.write('Logging:\n')
+
     ###
     stdscr.nodelay(True)
     curses.noecho()
     stdscr.keypad(True)
     curses.curs_set(0)
-    scrx = [5,35,55]
+    scrx = [5,30,55]
     scry = 15
     if curses.has_colors:
         curses.start_color()
-        curses.init_pair(1,curses.COLOR_WHITE,curses.COLOR_BLUE)
-        curses.init_pair(2,curses.COLOR_WHITE,curses.COLOR_RED)
-        curses.init_pair(3,curses.COLOR_BLACK,curses.COLOR_GREEN)
+        curses.init_pair(1,curses.COLOR_WHITE,curses.COLOR_BLUE) #loading, labels
+        curses.init_pair(2,curses.COLOR_WHITE,curses.COLOR_RED) #disabled
+        curses.init_pair(3,curses.COLOR_BLACK,curses.COLOR_GREEN) #endabled
     stdscr.addstr(0,0,'Starting...',curses.color_pair(1))
     stdscr.refresh()
    # time.sleep(2)
     ###
-
+    stdscr.addstr(1,0,'Opening Arduino COM port...',curses.color_pair(1))
+    stdscr.refresh()
     n = 80
     serial_port  = 'COM8'; #pid lock arduino port
 
@@ -47,22 +51,29 @@ def main(stdscr):
                             stopbits=serial.STOPBITS_ONE, 
                             timeout=1)
 
+    stdscr.addstr(2,0,'Starting wavemeter...',curses.color_pair(1))
+    stdscr.refresh()
     wlm = WavelengthMeter()
     time.sleep(2)
+    stdscr.addstr(3,0,'Starting fiberswitcher...',curses.color_pair(1))
+    stdscr.refresh()
     fib1 = Fiber('COM1')
     fib1.setchan(1)
     time.sleep(0.005)
     #chan_chk = fib1.getchan()
     #stdscr.addstr(scry+4,(scrx[1]+scrx[0])//2,chan_chk)
+    #stdscr.addstr()
+    stdscr.addstr(4,0,'Initializing variables...',curses.color_pair(1))
+    stdscr.refresh()
     chans = [1,2,3]
     setpoint_files = ['setpoint.txt','setpoint2.txt','setpoint3.txt']
     setpoints = [0,0,0]
     act_values = [0,0,0]
     ard_values = [0,0,0]
     ard_mess = [20481,20482,20483]
-    names = ['DAVOS','ARYA','A LASER']
-
-
+    names = ['DAVOS','ARYA','HeNe']
+    time.sleep(1)
+    stdscr.clear()
 
     # print('-'*n)
     # print('-'*n)
@@ -72,9 +83,11 @@ def main(stdscr):
 
     ###
     stdscr.addstr(0,0,'-'*n)
-    stdscr.addstr(1,10,'DUAL LASER LOCK')
+    stdscr.addstr(1,5,'DUAL LASER LOCK')
     stdscr.addstr(2,0,'-'*n)
-    stdscr.addstr(3,10,'Setpoint files in Z:\\')
+    stdscr.addstr(3,5,'Setpoint files in Z:\\')
+    incr = 100
+    stdscr.addstr(4,5,'Increment: '+str(incr)+'       ')
     stdscr.refresh()
     ###
 
@@ -90,7 +103,7 @@ def main(stdscr):
     for i in range(len(chans)):
         #print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
         ###
-        stdscr.addstr(i+5,10,'Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
+        stdscr.addstr(i+5,5,'Ch {}    File: {}    P: {}   I: {}   D: {}        '.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
         ###
         pid = PID(Kps[i],Kis[i],Kds[i],setpoints[i],sample_time = 0.01, output_limits = [-10, 10])
         pids[i] = pid
@@ -102,6 +115,11 @@ def main(stdscr):
     stdscr.addstr(scry+11,0,"Press 1 for Ch 1")
     stdscr.addstr(scry+12,0,"Press 2 for Ch 2")
     stdscr.addstr(scry+13,0,"Press a for All Chs")
+    stdscr.addstr(scry+9,0,"PID params only change in single channel mode")
+    stdscr.addstr(scry+10,25,"Press r/f to increase/decrease P")
+    stdscr.addstr(scry+11,25,"Press t/g to increase/decrease I")
+    stdscr.addstr(scry+12,25,"Press y/h to increase/decrease D")
+    stdscr.addstr(scry+13,25,"Press u/j to increase/decrease increment")
     stdscr.refresh()
     NO_KEY_PRESSED = -1
     key_pressed = NO_KEY_PRESSED
@@ -146,6 +164,80 @@ def main(stdscr):
             stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))
             stdscr.addstr(scry+5,scrx[2],'ENABLED ',curses.color_pair(3))
 
+        elif key_pressed == ord('r'):
+            #increase p
+            if chan_mode != 0:
+                new_p = Kps[chan_mode-1]+incr
+                Kps[chan_mode-1] = new_p
+                pids[chan_mode-1].Kp = new_p
+                stdscr.addstr(chan_mode+4,5,'Ch {}    File: {}    P: {}   I: {}   D: {}       '.format(chans[chan_mode-1],setpoint_files[chan_mode-1],Kps[chan_mode-1],Kis[chan_mode-1],Kds[chan_mode-1]))
+                stdscr.refresh()
+
+        elif key_pressed == ord('f'):
+            #decrease p
+            if chan_mode != 0:
+                new_p = Kps[chan_mode-1]-incr
+                if new_p >= 0:
+                    Kps[chan_mode-1] = new_p
+                    pids[chan_mode-1].Kp = new_p
+                    stdscr.addstr(chan_mode+4,5,'Ch {}    File: {}    P: {}   I: {}   D: {}       '.format(chans[chan_mode-1],setpoint_files[chan_mode-1],Kps[chan_mode-1],Kis[chan_mode-1],Kds[chan_mode-1]))
+                    stdscr.refresh()
+
+        elif key_pressed == ord('t'):
+            #increase i
+            if chan_mode != 0:
+                new_i = Kis[chan_mode-1]+incr
+                Kis[chan_mode-1] = new_i
+                pids[chan_mode-1].Ki = new_i
+                stdscr.addstr(chan_mode+4,5,'Ch {}    File: {}    P: {}   I: {}   D: {}       '.format(chans[chan_mode-1],setpoint_files[chan_mode-1],Kps[chan_mode-1],Kis[chan_mode-1],Kds[chan_mode-1]))
+                stdscr.refresh()
+
+        elif key_pressed == ord('g'):
+            #decrease i
+            if chan_mode != 0:
+                new_i = Kis[chan_mode-1]-incr
+                if new_i >= 0:
+                    Kis[chan_mode-1] = new_i
+                    pids[chan_mode-1].Ki = new_i
+                    stdscr.addstr(chan_mode+4,5,'Ch {}    File: {}    P: {}   I: {}   D: {}       '.format(chans[chan_mode-1],setpoint_files[chan_mode-1],Kps[chan_mode-1],Kis[chan_mode-1],Kds[chan_mode-1]))
+                    stdscr.refresh()
+
+        elif key_pressed == ord('y'):
+            #increase d
+            if chan_mode != 0:
+                new_d = Kds[chan_mode-1]+incr
+                Kds[chan_mode-1] = new_d
+                pids[chan_mode-1].Kd = new_d
+                stdscr.addstr(chan_mode+4,5,'Ch {}    File: {}    P: {}   I: {}   D: {}       '.format(chans[chan_mode-1],setpoint_files[chan_mode-1],Kps[chan_mode-1],Kis[chan_mode-1],Kds[chan_mode-1]))
+                stdscr.refresh()
+
+        elif key_pressed == ord('h'):
+            #decrease d
+            if chan_mode != 0:
+                new_d = Kds[chan_mode-1]-incr
+                if new_d >= 0:
+                    Kds[chan_mode-1] = new_d
+                    pids[chan_mode-1].Kd = new_d
+                    stdscr.addstr(chan_mode+4,5,'Ch {}    File: {}    P: {}   I: {}   D: {}       '.format(chans[chan_mode-1],setpoint_files[chan_mode-1],Kps[chan_mode-1],Kis[chan_mode-1],Kds[chan_mode-1]))
+                    stdscr.refresh()
+
+
+        elif key_pressed == ord('u'):
+            #increase incr
+            incr += 10
+            stdscr.addstr(4,5,'Increment: '+str(incr)+'       ')
+            stdscr.refresh()
+
+        elif key_pressed == ord('j'):
+            #decrease incr
+            if incr-10 > 0:
+                incr -= 10
+                stdscr.addstr(4,5,'Increment: '+str(incr)+'       ')
+                stdscr.refresh()
+            else:
+                pass
+
+
 
         elif key_pressed == ord('a'):
             chan_mode = 0
@@ -157,7 +249,9 @@ def main(stdscr):
 
         if chan_mode == 0:
             for l in range(len(chans)):
-                
+                wlm.Trigger(0)
+                #logfile.write('Loop begin')
+                #logfile.write('l: {}  CTL: {}  SET: {}  ACT: {}\n'.format(l,format(int((ard_mess[l]-chans[l])/10),'04d'),pids[l].setpoint,act_values[l]))
                 newset = ''
                 
                 file = open("z:\\"+setpoint_files[l], "r")
@@ -171,25 +265,25 @@ def main(stdscr):
                 # obtains the actual frequency value
                 fib1.setchan(chans[l])
                 d = 0
-                time.sleep(0.005)
-                rawch = fib1.getchan()
-                while int(rawch) != chans[l]:
-                    #stdscr.addstr(scry+4,(scrx[1]+scrx[0])//2,'Raw: '+str(rawch)+' ')
-                    #stdscr.refresh()
-                    if d == 1000:
-                        break
-                    time.sleep(0.001)
-                    d += 1
-                    rawch = fib1.getchan()
+               # time.sleep(0.005)
+                # rawch = fib1.getchan()
+                # while int(rawch) != chans[l]:
+                #     #stdscr.addstr(scry+4,(scrx[1]+scrx[0])//2,'Raw: '+str(rawch)+' ')
+                #     #stdscr.refresh()
+                #     if d == 1000:
+                #         break
+                #     time.sleep(0.001)
+                #     d += 1
+                #     rawch = fib1.getchan()
 
-                time.sleep(.03)
+                time.sleep(.06)
                 try_trig = wlm.Trigger(3)
                 #time.sleep(.01)
                 new_freq = wlm.frequency               
                 #time.sleep(.01)
                 #wlm.Trigger(1)
                 #stdscr.addstr(scry+5,(scrx[1]+scrx[0])//2,'Last Delay: '+str(d)+'   ')
-                time.sleep(1)
+                #time.sleep(.01)
 
                 if new_freq >= 0:
                     act_values[l] = new_freq
@@ -214,9 +308,10 @@ def main(stdscr):
                 ###
                 stdscr.addstr(scry-1,scrx[l],names[l],curses.color_pair(1))
                 stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
-                stdscr.addstr(scry+1,scrx[l],'SET: '+str(pids[l].setpoint)[:10])
-                stdscr.addstr(scry+2,scrx[l],'ACT: '+str(act_values[l])[:10])
+                stdscr.addstr(scry+1,scrx[l],'SET: '+"{0:.6f}".format(pids[l].setpoint))
+                stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
                 stdscr.refresh()
+                #logfile.write('l: {}  CTL: {}  SET: {}  ACT: {}\n'.format(l,format(int((ard_mess[l]-chans[l])/10),'04d'),pids[l].setpoint,act_values[l]))
                 ###
         else:
             newset = ''
@@ -255,21 +350,23 @@ def main(stdscr):
 
         
             # for k in range(len(chans)):
-            #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10),'04d'),end='  ')
+            #     print('CTL {}:'.format(chans[k]),format(int((ard_mess[k]-chans[k])/10)hhh,'04d'),end='  ')
             #     print('SET {}:'.format(chans[k]),str(pids[k].setpoint)[:10],end='  ')
             #     print('ACT {}:'.format(chans[k]),str(act_values[k])[:10],end='  ')
             ###
             stdscr.addstr(scry-1,scrx[l],names[l],curses.color_pair(1))
             stdscr.addstr(scry,scrx[l],'CTL: '+str(format(int((ard_mess[l]-chans[l])/10),'04d')))
-            stdscr.addstr(scry+1,scrx[l],'SET: '+str(pids[l].setpoint)[:10])
-            stdscr.addstr(scry+2,scrx[l],'ACT: '+str(act_values[l])[:10])
+            stdscr.addstr(scry+1,scrx[l],'SET: '+"{0:.6f}".format(pids[l].setpoint))
+            stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
             stdscr.refresh()
 
                #print('            \r',end='')
         time.sleep(0.001)
+
         
     wlm.Trigger(0)
     ser.close()
+    #logfile.close()
 
 
 curses.wrapper(main)
