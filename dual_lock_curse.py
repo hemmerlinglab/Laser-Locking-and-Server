@@ -10,6 +10,8 @@ import curses
 def main(stdscr):
     #logfile = open('logfile.txt','w')
     #logfile.write('Logging:\n')
+    #fib1 = serial.Serial('COM1',baudrate=115200,timeout=1.0,parity=serial.PARITY_NONE,stopbits = serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS)
+
 
     ###
     stdscr.nodelay(True)
@@ -59,6 +61,7 @@ def main(stdscr):
     stdscr.refresh()
     fib1 = Fiber('COM1')
     fib1.setchan(1)
+    #fib1.write('I1 1\r'.encode('ascii'))
     time.sleep(0.005)
     #chan_chk = fib1.getchan()
     #stdscr.addstr(scry+4,(scrx[1]+scrx[0])//2,chan_chk)
@@ -71,7 +74,7 @@ def main(stdscr):
     act_values = [0,0,0]
     ard_values = [0,0,0]
     ard_mess = [20481,20482,20483]
-    names = ['DAVOS','ARYA','HeNe']
+    names = ['DAVOS','ARYA','HODOR']
     time.sleep(1)
     stdscr.clear()
 
@@ -107,14 +110,13 @@ def main(stdscr):
         ###
         pid = PID(Kps[i],Kis[i],Kds[i],setpoints[i],sample_time = 0.01, output_limits = [-10, 10])
         pids[i] = pid
-        fib1.setchan(chans[i])
+        #fib1.setchan(chans[i])
     #print('-'*n)
     ###
     stdscr.addstr(10,0,'-'*n)
     stdscr.addstr(scry+10,0,"Press q to quit")
-    stdscr.addstr(scry+11,0,"Press 1 for Ch 1")
-    stdscr.addstr(scry+12,0,"Press 2 for Ch 2")
-    stdscr.addstr(scry+13,0,"Press a for All Chs")
+    stdscr.addstr(scry+11,0,"Press # for Ch #")
+    stdscr.addstr(scry+12,0,"Press a for All")
     stdscr.addstr(scry+9,0,"PID params only change in single channel mode")
     stdscr.addstr(scry+10,25,"Press r/f to increase/decrease P")
     stdscr.addstr(scry+11,25,"Press t/g to increase/decrease I")
@@ -139,6 +141,7 @@ def main(stdscr):
         key_pressed = stdscr.getch()
         if key_pressed == ord('1'):
             fib1.setchan(1)
+            #fib1.write('I1 1\r'.encode('ascii'))
             time.sleep(.1)
             wlm.Trigger(0)
             chan_mode = 1
@@ -148,6 +151,7 @@ def main(stdscr):
 
         elif key_pressed == ord('2'):
             fib1.setchan(2)
+            #fib1.write('I1 2\r'.encode('ascii'))
             time.sleep(.1)
             wlm.Trigger(0)
             chan_mode = 2
@@ -157,6 +161,7 @@ def main(stdscr):
 
         elif key_pressed == ord('3'):
             fib1.setchan(3)
+            #fib1.write('I1 3\r'.encode('ascii'))
             time.sleep(.1)
             wlm.Trigger(0)
             chan_mode = 3
@@ -264,6 +269,7 @@ def main(stdscr):
 
                 # obtains the actual frequency value
                 fib1.setchan(chans[l])
+                #fib1.write('I1 {}\r'.format(chans[l]).encode('ascii'))
                 d = 0
                # time.sleep(0.005)
                 # rawch = fib1.getchan()
@@ -369,9 +375,11 @@ def main(stdscr):
                #print('            \r',end='')
         time.sleep(0.001)
 
-        
+    #fib1.write('I1 0\r'.encode('ascii'))
+    fib1.setchan(0)
     wlm.Trigger(0)
     ser.close()
+    fib1.close()
     #logfile.close()
 
 

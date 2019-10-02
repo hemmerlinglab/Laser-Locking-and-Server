@@ -69,18 +69,18 @@ class Fiber():
 
     def listen(self):
         try:
-            ret = self.ser.readline().decode()
+            ret = self.ser.read(4).decode()
             #print(ret)
             listening = True
             #time.sleep(0.005)
             while listening:
-                print(ret.encode())
+                #print(ret.encode())
                 if '\r\n>' in ret:
                     listening = False
                     #print(type(ret))
                     return ret.split('\r\n>')[0][-1]
                 else:
-                    newret = self.ser.readline().decode()
+                    newret = self.ser.read(4).decode()
                     #print(newret)
                     ret = ret + newret
         except:
