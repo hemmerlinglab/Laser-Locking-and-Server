@@ -74,7 +74,7 @@ def main(stdscr):
     act_values = [0,0,0]
     ard_values = [0,0,0]
     ard_mess = [20481,20482,20483]
-    names = ['DAVOS','ARYA','HODOR']
+    names = ['DAVOS','HODOR','ARYA']
     time.sleep(1)
     stdscr.clear()
 
@@ -282,7 +282,7 @@ def main(stdscr):
                 #     d += 1
                 #     rawch = fib1.getchan()
 
-                time.sleep(.06)
+                time.sleep(.09)
                 try_trig = wlm.Trigger(3)
                 #time.sleep(.01)
                 new_freq = wlm.frequency               
