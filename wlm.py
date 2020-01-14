@@ -98,6 +98,14 @@ class WavelengthMeter:
         	self.dll.SetSwitcherMode(ctypes.c_long(int(mode)))
         else:
             pass
+			
+	
+    def set_switcher_mode(self, mode):
+        if not self.debug:
+        	print('Setting mode to ' + str(mode))
+        	return self.dll.SetSwitcherMode(ctypes.c_long(int(mode)))
+        else:
+            pass
 
 if __name__ == '__main__':
 
