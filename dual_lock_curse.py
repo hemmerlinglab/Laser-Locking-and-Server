@@ -18,7 +18,7 @@ def main(stdscr):
     curses.noecho()
     stdscr.keypad(True)
     curses.curs_set(0)
-    scrx = [5,30,55]
+    scrx = [5,25,45,65]
     scry = 15
     if curses.has_colors:
         curses.start_color()
@@ -32,7 +32,7 @@ def main(stdscr):
     stdscr.addstr(1,0,'Opening Arduino COM port...',curses.color_pair(1))
     stdscr.refresh()
     n = 80
-    serial_port  = 'COM8'; #pid lock arduino port
+    serial_port  = 'COM9'; #pid lock arduino port
 
     baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
 
@@ -68,13 +68,13 @@ def main(stdscr):
     #stdscr.addstr()
     stdscr.addstr(4,0,'Initializing variables...',curses.color_pair(1))
     stdscr.refresh()
-    chans = [1,2,3]
-    setpoint_files = ['setpoint.txt','setpoint2.txt','setpoint3.txt']
-    setpoints = [0,0,0]
-    act_values = [0,0,0]
-    ard_values = [0,0,0]
-    ard_mess = [20481,20482,20483]
-    names = ['DAVOS','HODOR','ARYA']
+    chans = [1,2,3,4]
+    setpoint_files = ['setpoint.txt','setpoint2.txt','setpoint3.txt','setpoint4.txt']
+    setpoints = [0,0,0,0]
+    act_values = [0,0,0,0]
+    ard_values = [0,0,0,0]
+    ard_mess = [20481,20482,20483,20484]
+    names = ['DAVOS','HODOR','ARYA','HeNe']
     time.sleep(1)
     stdscr.clear()
 
@@ -98,10 +98,10 @@ def main(stdscr):
         file = open("z:\\"+setpoint_files[i], "r")
         setpoints[i] = file.readline().strip()
         file.close()
-    pids = ['','','']
-    Kps = [100,100,100]
-    Kis = [1000,1000,1000]
-    Kds = [0,0,0]
+    pids = ['','','','']
+    Kps = [100,100,100,100]
+    Kis = [1000,1000,1000,1000]
+    Kds = [0,0,0,0]
 
     for i in range(len(chans)):
         #print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
@@ -128,7 +128,8 @@ def main(stdscr):
     chan_mode = 0
     stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
     stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
-    stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(3))
+    stdscr.addstr(scry+5,scrx[2],'ENABLED ',curses.color_pair(3))
+    stdscr.addstr(scry+5,scrx[3],'ENABLED ',curses.color_pair(3))
 
     ###
 
@@ -147,7 +148,8 @@ def main(stdscr):
             chan_mode = 1
             stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
             stdscr.addstr(scry+5,scrx[1],'DISABLED',curses.color_pair(2))
-            stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(2)) 
+            stdscr.addstr(scry+5,scrx[3],'DISABLED',curses.color_pair(2))
 
         elif key_pressed == ord('2'):
             fib1.setchan(2)
@@ -158,6 +160,7 @@ def main(stdscr):
             stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
             stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))            
             stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[3],'DISABLED',curses.color_pair(2))
 
         elif key_pressed == ord('3'):
             fib1.setchan(3)
@@ -168,6 +171,18 @@ def main(stdscr):
             stdscr.addstr(scry+5,scrx[1],'DISABLED',curses.color_pair(2))
             stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))
             stdscr.addstr(scry+5,scrx[2],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[3],'DISABLED',curses.color_pair(2))
+
+        elif key_pressed == ord('4'):
+            fib1.setchan(4)
+            #fib1.write('I1 3\r'.encode('ascii'))
+            time.sleep(.1)
+            wlm.Trigger(0)
+            chan_mode = 4
+            stdscr.addstr(scry+5,scrx[1],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[0],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[2],'DISABLED',curses.color_pair(2))
+            stdscr.addstr(scry+5,scrx[3],'ENABLED ',curses.color_pair(3))
 
         elif key_pressed == ord('r'):
             #increase p
@@ -249,6 +264,7 @@ def main(stdscr):
             stdscr.addstr(scry+5,scrx[1],'ENABLED ',curses.color_pair(3))
             stdscr.addstr(scry+5,scrx[0],'ENABLED ',curses.color_pair(3))
             stdscr.addstr(scry+5,scrx[2],'ENABLED ',curses.color_pair(3))
+            stdscr.addstr(scry+5,scrx[3],'ENABLED ',curses.color_pair(3))
         else:
             pass
 
@@ -318,7 +334,7 @@ def main(stdscr):
                 try:
                     stdscr.addstr(scry+2,scrx[l],'ACT: '+"{0:.6f}".format(act_values[l]))
                 except:
-                    stdscr.addstr(scry+2,scrx[l],'ACT: '+act_values[l]+'       ')
+                    stdscr.addstr(scry+2,scrx[l],'ACT: '+act_values[l]+'     ')
                 stdscr.refresh()
                 #logfile.write('l: {}  CTL: {}  SET: {}  ACT: {}\n'.format(l,format(int((ard_mess[l]-chans[l])/10),'04d'),pids[l].setpoint,act_values[l]))
                 ###
