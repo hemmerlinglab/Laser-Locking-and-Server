@@ -37,7 +37,7 @@ class App(QWidget):
         self.no_of_points = 100
         self.no_of_arduinos = 1
 
-        #self.wlm = WavelengthMeter()
+        self.wlm = WavelengthMeter()
         
 
         self.initUI()
@@ -47,7 +47,26 @@ class App(QWidget):
         
 
     def tick(self):
-        return
+        all_freq_reads = self.wlm.frequencies
+
+        for laser in self.laser_objs.keys():
+            freq_read = all_freq_reads[int(self.laser_objs[laser].chan) - 1]
+            if freq_read >= 0:
+                freq_mess = freq_read
+                if self.laser_objs[laser].lockable and self.laser_objs[laser].lock_check.isChecked():
+                    control = self.laser_objs[laser].my_pid(freq_mess)
+                    ard_num = int(4095.0/20 * control + 4095.0/2.0)
+                    mystr = '{:04d}'.format(ard_num).encode('utf-8')
+                    self.laser_objs[laser].my_ard.ser.write(mystr)
+
+            elif freq_read == -3.0:
+                freq_mess = 'UNDER'
+            elif freq_read == -4.0: 
+                freq_mess = 'OVER'
+            else:
+                freq_mess = 'ERROR'
+
+            self.laser_objs[laser].update_frequency(freq_mess)
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -64,6 +83,11 @@ class App(QWidget):
             newlas.update_lockable(self.lasers[las]['lockable'])
             newlas.update_channel(self.lasers[las]['chan'])
             newlas.filename = self.lasers[las]['setfile']
+            if newlas.lockable:
+                newlas.my_ard = Arduino(self.lasers[las]['com_port'])
+            else:
+                print('arduino not created')
+            newlas.get_setpoint()
             self.main_layout.addWidget(newlas)
             self.laser_objs[las] = newlas
 
@@ -90,7 +114,9 @@ class Laser(QWidget):
         self.fstep = 50
         self.filename = ''
         self.basefolder = 'z:\\'
-        
+        self.my_pid = PID(self.p,self.i,self.d,self.setpoint,sample_time = 0.01, output_limits = [-10,10])
+        self.my_ard = ''
+
         self.layout = QGridLayout()
 
         self.name_label = QLabel(self.name)
@@ -119,8 +145,12 @@ class Laser(QWidget):
         self.laser_scan.setMinimum(-5000)
         self.laser_scan.setMaximum(5000)
         self.laser_scan.setSingleStep(np.int(self.fstep))
+
         self.laser_scan.valueChanged.connect(self.set_setpoint)
         self.laser_scan.valueChanged.connect(self.set_fstep)
+        self.p_value.returnPressed.connect(self.update_p)
+        self.i_value.returnPressed.connect(self.update_i)
+        self.d_value.returnPressed.connect(self.update_d)
 
         self.pid_label = QLabel('PID Values')
         self.lock_check = QCheckBox('Lock')
@@ -146,14 +176,16 @@ class Laser(QWidget):
         self.layout.addWidget(self.i_value,9,1)
         self.layout.addWidget(self.d_label,10,0)
         self.layout.addWidget(self.d_value,10,1)
-        #self.layout.addWidget(self.man_check,8,0)
         
         self.setLayout(self.layout)
 
     def update_frequency(self,new_freq):
         nf = new_freq
         self.frequency = nf
-        self.freq_label.setText("{0:.6f}".format(nf))
+        try:
+            self.freq_value.setText("{0:.6f}".format(nf))
+        except:
+            self.freq_value.setText(nf)
 
     def update_name(self,new_name):
         nn = str(new_name)
@@ -163,6 +195,18 @@ class Laser(QWidget):
     def update_channel(self,new_chan):
         nc = int(new_chan)
         self.chan = new_chan
+
+    def update_p(self):
+        self.p = np.float(self.p_value.text())
+        self.my_pid.Kp = self.p
+
+    def update_i(self):
+        self.i = np.float(self.i_value.text())
+        self.my_pid.Ki = self.i
+
+    def update_d(self):
+        self.d = np.float(self.d_value.text())
+        self.my_pid.Kd = self.d
 
     # def update_type(self,new_type):
     #   nt = str(new_type)
@@ -179,8 +223,8 @@ class Laser(QWidget):
         if not self.lockable:
             self.ard_label.hide()
             self.ard_value.hide()
-            #self.set_label.hide()
-            #self.set_value.hide()
+            self.scan_label.hide()
+            self.laser_scan.hide()
             self.off_label.hide()
             self.off_value.hide()
             self.step_label.hide()
@@ -208,6 +252,7 @@ class Laser(QWidget):
         file.close()
         self.setpoint = ns
         self.set_value.setText("{0:.6f}".format(ns))
+        self.my_pid.setpoint = self.setpoint
 
 
     def get_setpoint(self):
@@ -229,7 +274,7 @@ class Laser(QWidget):
 
 class Arduino():
     def __init__(self,com_port):
-        self.port = com_port
+        serial_port = com_port
         baud_rate = 9600;
 
         try:
