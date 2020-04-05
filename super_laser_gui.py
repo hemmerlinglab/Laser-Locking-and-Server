@@ -83,10 +83,10 @@ class App(QWidget):
             newlas.update_lockable(self.lasers[las]['lockable'])
             newlas.update_channel(self.lasers[las]['chan'])
             newlas.filename = self.lasers[las]['setfile']
-            if newlas.lockable:
-                newlas.my_ard = Arduino(self.lasers[las]['com_port'])
-            else:
-                print('arduino not created')
+            # if newlas.lockable:
+            #     newlas.my_ard = Arduino(self.lasers[las]['com_port'])
+            # else:
+            #     print('arduino not created')
             newlas.get_setpoint()
             self.main_layout.addWidget(newlas)
             self.laser_objs[las] = newlas
