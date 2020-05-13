@@ -102,6 +102,9 @@ class Fiber():
                 self.setchan(chan)
                 time.sleep(.5)
 
+    def close(self):
+        self.setchan(1)
+
 
 
 

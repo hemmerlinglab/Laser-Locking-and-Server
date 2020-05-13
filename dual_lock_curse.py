@@ -392,7 +392,7 @@ def main(stdscr):
         time.sleep(0.001)
 
     #fib1.write('I1 0\r'.encode('ascii'))
-    fib1.setchan(0)
+    #fib1.setchan(0)
     wlm.Trigger(0)
     ser.close()
     fib1.close()

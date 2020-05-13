@@ -7,7 +7,7 @@ from wlm import *
 from Fiber import *
 #import numpy
 
-serial_port  = 'COM8'; #pid lock arduino port
+serial_port  = 'COM14'; #pid lock arduino port
 
 baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
 
@@ -67,8 +67,8 @@ for i in range(len(chans)):
 
 #diff = abs(pid.setpoint - wlm.frequency)
 pids = ['']
-Kps = [-1000]
-Kis = [-20000]
+Kps = [-100]
+Kis = [-1000]
 time.sleep(.1)
 
 for i in range(len(chans)):
