@@ -32,7 +32,7 @@ def main(stdscr):
     stdscr.addstr(1,0,'Opening Arduino COM port...',curses.color_pair(1))
     stdscr.refresh()
     n = 80
-    serial_port  = 'COM9'; #pid lock arduino port
+    serial_port  = 'COM14'; #pid lock arduino port
 
     baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
 
