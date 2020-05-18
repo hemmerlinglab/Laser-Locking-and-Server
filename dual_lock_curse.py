@@ -99,8 +99,8 @@ def main(stdscr):
         setpoints[i] = file.readline().strip()
         file.close()
     pids = ['','','','']
-    Kps = [100,100,100,100]
-    Kis = [1000,1000,1000,1000]
+    Kps = [10,100,100,100]
+    Kis = [100,1000,1000,1000]
     Kds = [0,0,0,0]
 
     for i in range(len(chans)):

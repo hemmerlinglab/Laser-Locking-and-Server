@@ -72,10 +72,11 @@ void loop()
                 //Serial.println();
  
                 //delay(1);
-                //Serial.println(buf[0]);            
-                //Serial.println(buf[1]);
-                //Serial.println(buf[2]);
-                //Serial.println(buf[3]);
+                //Serial.print(buf[0]);            
+                //Serial.print(buf[1]);
+                //Serial.print(buf[2]);
+                //Serial.print(buf[3]);
+                
                 //Serial.println(val);
                 //Serial.println(1234346);
                 //Serial.println("end");

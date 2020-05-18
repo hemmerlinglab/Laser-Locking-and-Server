@@ -7,7 +7,7 @@ from wlm import *
 from Fiber import *
 #import numpy
 
-serial_port  = 'COM8'; #pid lock arduino port
+serial_port  = 'COM14'; #pid lock arduino port
 
 baud_rate = 9600; #In arduino, Serial.begin(baud_rate)
 
@@ -38,11 +38,12 @@ except:
 #pid.proportional_on_measurement = True
 #print(setpoint)
 while True:
-    for i in range(4095):
-        new_cont = "{:04d}".format(i).encode("utf-8")
+    for i in range(409):
+        new_cont = "{:05d}".format(i*100+1).encode("utf-8")
         ser.write(new_cont)
-        time.sleep(.1)
-        print(i)
+        #time.sleep(.1)
+        ardin = ser.read(4).decode()
+        print('Computer: {}  Arduino: {}'.format(str(i*10),ardin))
 
 #diff is proportional to the error signal
 # which is then proportional to the voltage the pid needs to give out
