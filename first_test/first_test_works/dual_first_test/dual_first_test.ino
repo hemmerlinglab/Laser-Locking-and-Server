@@ -53,9 +53,13 @@ void loop()
                 noofbytes = Serial.readBytes(buf,5);
                 chan = conv(buf[4]);                
                 val = conv(buf[3]) + 10*conv(buf[2]) + 100*conv(buf[1]) + 1000*conv(buf[0]);
+                
+                //chan = 1;
                 if(chan==1){
                   analogWrite(DAC0,val);
                 }
+
+                //chan = 2;
                 if(chan==2){
                   analogWrite(DAC1,val);
                 }
