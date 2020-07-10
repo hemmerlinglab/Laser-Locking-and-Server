@@ -100,8 +100,10 @@ def main(stdscr):
         file.close()
     pids = ['','','','']
     Kps = [10,100,100,100]
-    Kis = [100,1000,1000,1000]
+    Kis = [100,100,100,1000]
     Kds = [0,0,0,0]
+
+    invert_pid = -1
 
     for i in range(len(chans)):
         #print('Ch {}    File: {}    P: {}   I: {}   D: {}'.format(chans[i],setpoint_files[i],Kps[i],Kis[i],Kds[i]))
@@ -309,7 +311,7 @@ def main(stdscr):
 
                 if new_freq >= 0:
                     act_values[l] = new_freq
-                    control = pids[l](act_values[l])
+                    control = invert_pid * pids[l](act_values[l])
                     ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
                     mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
                     ser.write(mystr) # converts from unicode to bytes
@@ -360,7 +362,7 @@ def main(stdscr):
 
             if new_freq >= 0:
                 act_values[l] = new_freq
-                control = pids[l](act_values[l])
+                control = invert_pid * pids[l](act_values[l])
                 ard_mess[l] =  int(4095.0/20 * control + 4095.0/2.0)*10+chans[l]
                 mystr = '{:05d}'.format(ard_mess[l]).encode('utf-8')
                 ser.write(mystr) # converts from unicode to bytes
